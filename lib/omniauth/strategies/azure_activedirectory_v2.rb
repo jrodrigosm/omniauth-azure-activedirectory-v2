@@ -19,28 +19,38 @@ module OmniAuth
         log :debug, "***** OmniAuth::Strategies::AzureActivedirectoryV2#client - Starting"
         log :debug, "***** OmniAuth::Strategies::AzureActivedirectoryV2#client - options are #{options.inspect}"
         provider = if options.tenant_provider
+          log :debug, "***** OmniAuth::Strategies::AzureActivedirectoryV2#client - options.tenant_provider is truthy"
           options.tenant_provider.new(self)
         else
+          log :debug, "***** OmniAuth::Strategies::AzureActivedirectoryV2#client - options.tenant_provider is falsy"
           options
         end
+        log :debug, "***** OmniAuth::Strategies::AzureActivedirectoryV2#client - provider is #{provider.inspect}"
 
         options.client_id = provider.client_id
+        log :debug, "***** OmniAuth::Strategies::AzureActivedirectoryV2#client - options.client_id = #{options.client_id}"
         options.client_secret = provider.client_secret
+        log :debug, "***** OmniAuth::Strategies::AzureActivedirectoryV2#client - options.client_secret = #{options.client_secret}"
         options.tenant_id =
           provider.respond_to?(:tenant_id) ? provider.tenant_id : 'common'
+        log :debug, "***** OmniAuth::Strategies::AzureActivedirectoryV2#client - options.tenant_id = #{options.tenant_id}"
         options.base_azure_url =
           provider.respond_to?(:base_azure_url) ? provider.base_azure_url : BASE_AZURE_URL
+        log :debug, "***** OmniAuth::Strategies::AzureActivedirectoryV2#client - options.base_azure_url = #{options.base_azure_url}"
 
         if provider.respond_to?(:authorize_params)
           options.authorize_params = provider.authorize_params
+          log :debug, "***** OmniAuth::Strategies::AzureActivedirectoryV2#client - options.authorize_params = #{options.authorize_params}"
         end
 
         if provider.respond_to?(:domain_hint) && provider.domain_hint
           options.authorize_params.domain_hint = provider.domain_hint
+          log :debug, "***** OmniAuth::Strategies::AzureActivedirectoryV2#client - options.authorize_params.domain_hint = #{options.authorize_params.domain_hint}"
         end
 
         if defined?(request) && request.params['prompt']
           options.authorize_params.prompt = request.params['prompt']
+          log :debug, "***** OmniAuth::Strategies::AzureActivedirectoryV2#client - options.authorize_params.prompt = #{options.authorize_params.prompt}"
         end
 
         options.authorize_params.scope = if provider.respond_to?(:scope) && provider.scope
@@ -48,17 +58,21 @@ module OmniAuth
         else
           DEFAULT_SCOPE
         end
+        log :debug, "***** OmniAuth::Strategies::AzureActivedirectoryV2#client - options.authorize_params.scope = #{options.authorize_params.scope}"
 
         options.custom_policy =
           provider.respond_to?(:custom_policy) ? provider.custom_policy : nil
+        log :debug, "***** OmniAuth::Strategies::AzureActivedirectoryV2#client - options.custom_policy = #{options.custom_policy}"
 
         options.client_options.authorize_url = "#{options.base_azure_url}/#{options.tenant_id}/oauth2/v2.0/authorize"
+        log :debug, "***** OmniAuth::Strategies::AzureActivedirectoryV2#client - options.client_options.authorize_url = #{options.client_options.authorize_url}"
         options.client_options.token_url =
           if options.custom_policy
             "#{options.base_azure_url}/#{options.tenant_id}/#{options.custom_policy}/oauth2/v2.0/token"
           else
             "#{options.base_azure_url}/#{options.tenant_id}/oauth2/v2.0/token"
           end
+        log :debug, "***** OmniAuth::Strategies::AzureActivedirectoryV2#client - options.client_options.token_url = #{options.client_options.token_url}"
 
         log :debug, "***** OmniAuth::Strategies::AzureActivedirectoryV2#client - Calling super"
         super
