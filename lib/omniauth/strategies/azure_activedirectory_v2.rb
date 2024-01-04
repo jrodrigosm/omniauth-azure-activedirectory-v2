@@ -16,6 +16,8 @@ module OmniAuth
       args [:tenant_provider]
 
       def client
+        log :debug, "***** OmniAuth::Strategies::AzureActivedirectoryV2#client - Starting"
+        log :debug, "***** OmniAuth::Strategies::AzureActivedirectoryV2#client - options are #{options.inspect}"
         provider = if options.tenant_provider
           options.tenant_provider.new(self)
         else
@@ -58,6 +60,7 @@ module OmniAuth
             "#{options.base_azure_url}/#{options.tenant_id}/oauth2/v2.0/token"
           end
 
+        log :debug, "***** OmniAuth::Strategies::AzureActivedirectoryV2#client - Calling super"
         super
       end
 
@@ -92,22 +95,32 @@ module OmniAuth
       # token data if keys collide, and use this as raw info.
       #
       def raw_info
+        log :debug, "***** OmniAuth::Strategies::AzureActivedirectoryV2#raw_info - Starting"
         if @raw_info.nil?
+          log :debug, "***** OmniAuth::Strategies::AzureActivedirectoryV2#raw_info - @raw_info was nil"
           id_token_data = begin
+            log :debug, "***** OmniAuth::Strategies::AzureActivedirectoryV2#raw_info - Decoding access_token.params['id_token'] = #{access_token.params['id_token']}"
             ::JWT.decode(access_token.params['id_token'], nil, false).first
-          rescue StandardError
+          rescue StandardError => e
+            log :debug, "***** OmniAuth::Strategies::AzureActivedirectoryV2#raw_info - Caught error #{e.inspect} while decoding access_token.params['id_token']"
             {}
           end
+          log :debug, "***** OmniAuth::Strategies::AzureActivedirectoryV2#raw_info - id_token_data is #{id_token_data}"
           auth_token_data = begin
+            log :debug, "***** OmniAuth::Strategies::AzureActivedirectoryV2#raw_info - Decoding access_token.token = #{access_token.token}"
             ::JWT.decode(access_token.token, nil, false).first
-          rescue StandardError
+          rescue StandardError => e
+            log :debug, "***** OmniAuth::Strategies::AzureActivedirectoryV2#raw_info - Caught error #{e.inspect} while decoding access_token.token"
             {}
           end
+          log :debug, "***** OmniAuth::Strategies::AzureActivedirectoryV2#raw_info - auth_token_data is #{auth_token_data}"
 
           id_token_data.merge!(auth_token_data)
+          log :debug, "***** OmniAuth::Strategies::AzureActivedirectoryV2#raw_info - id_token_data is now #{id_token_data}"
           @raw_info = id_token_data
         end
 
+        log :debug, "***** OmniAuth::Strategies::AzureActivedirectoryV2#raw_info - Returning #{@raw_info}"
         @raw_info
       end
     end
